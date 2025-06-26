@@ -162,7 +162,7 @@ class AVHubertDataset(FairseqDataset):
             image_std: float=1,
             image_crop_size: int=88,
             image_aug: bool=False,
-            image_noise: bool=False,
+            image_noise: float=0.0,
             modalities: Optional[List[str]]=None,
             is_s2s=False,
             noise_fn=None,
