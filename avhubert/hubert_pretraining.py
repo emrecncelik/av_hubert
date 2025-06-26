@@ -265,7 +265,7 @@ class AVHubertPretrainingTask(FairseqTask):
             image_std=self.cfg.image_std,
             image_crop_size=self.cfg.image_crop_size,
             image_aug=image_aug,
-            image_noise=image_noise,
+            image_noise=self.cfg.image_noise,
             modalities=self.cfg.modalities,
             is_s2s=self.cfg.is_s2s,
             noise_fn=noise_fn,
