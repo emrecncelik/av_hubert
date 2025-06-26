@@ -9,6 +9,7 @@ import torch
 import random
 import numpy as np
 from typing import Dict, List, Optional, Tuple
+from scipy.ndimage import gaussian_filter
 
 def load_video(path):
     for i in range(3):
@@ -28,6 +29,38 @@ def load_video(path):
             print(f"failed loading {path} ({i} / 3)")
             if i == 2:
                 raise ValueError(f"Unable to load {path}")
+
+
+class GaussianBlur(object):
+    """Apply Gaussian blur to a single frame using SciPy.
+
+    Args:
+        sigma (float or sequence of float): Standard deviation for the Gaussian kernel.
+            If a single float is provided, the same sigma is used for both spatial dims.
+    """
+    def __init__(self, sigma):
+        self.sigma = sigma
+
+    def __call__(self, frame):
+        """
+        Args:
+            frame (numpy.ndarray): A single image frame, shape (H, W, C), dtype uint8 (or similar).
+        Returns:
+            numpy.ndarray: Blurred frame, same shape and dtype.
+        """
+        # Allocate output array
+        out = np.empty_like(frame)
+
+        # Blur each channel independently
+        for c in range(frame.shape[2]):
+            blurred = gaussian_filter(frame[..., c], sigma=self.sigma)
+            # Clip back into valid range and cast to original dtype
+            out[..., c] = np.clip(blurred, 0, 255).astype(frame.dtype)
+
+        return out
+
+    def __repr__(self):
+        return f"{self.__class__.__name__}(sigma={self.sigma})"
 
 
 class Compose(object):

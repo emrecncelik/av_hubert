@@ -162,6 +162,7 @@ class AVHubertDataset(FairseqDataset):
             image_std: float=1,
             image_crop_size: int=88,
             image_aug: bool=False,
+            image_noise: bool=False,
             modalities: Optional[List[str]]=None,
             is_s2s=False,
             noise_fn=None,
@@ -215,13 +216,19 @@ class AVHubertDataset(FairseqDataset):
         self.normalize = normalize
         if image_aug:
             self.transform = custom_utils.Compose([
-                custom_utils.Normalize( 0.0,255.0 ),
+                custom_utils.Normalize(0.0,255.0 ),
                 custom_utils.RandomCrop((image_crop_size, image_crop_size)),
                 custom_utils.HorizontalFlip(0.5),
                 custom_utils.Normalize(image_mean, image_std) ])
+        elif image_noise:
+                self.transform = custom_utils.Compose([
+                custom_utils.Normalize(0.0,255.0 ),
+                custom_utils.CenterCrop((image_crop_size, image_crop_size)),
+                custom_utils.GaussianBlur(image_noise),
+                custom_utils.Normalize(image_mean, image_std) ])
         else:
             self.transform = custom_utils.Compose([
-                custom_utils.Normalize( 0.0,255.0 ),
+                custom_utils.Normalize(0.0,255.0 ),
                 custom_utils.CenterCrop((image_crop_size, image_crop_size)),
                 custom_utils.Normalize(image_mean, image_std) ])
         logger.info(f"image transform: {self.transform}")
@@ -232,6 +239,7 @@ class AVHubertDataset(FairseqDataset):
             f"seqs2seq data={self.is_s2s},")
         logger.info(
             f"Noise wav: {noise_fn}->{len(self.noise_wav)} wav, Prob: {self.noise_prob}, SNR: {self.noise_snr}, Number of mixture: {self.noise_num}"
+            f"Image noise: sigma: {image_noise}"
         )
 
     def get_label(self, index, label_idx):
