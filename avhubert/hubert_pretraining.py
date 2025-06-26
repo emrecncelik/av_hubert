@@ -141,6 +141,8 @@ class AVHubertPretrainingConfig(FairseqDataclass):
         metadata={"help": "skip verifying label-audio alignment"},
     )
     image_aug: bool = field(default=False, metadata={'help': 'image data augmentation'})
+    image_noise: float = field(
+        default=0.0, metadata={"help": "image noise level sigma in gaussian, 0 for no noise"})
     image_crop_size: int = field(
         default=88, metadata={"help": "image ROI size"})
     image_mean: float = field(
@@ -263,6 +265,7 @@ class AVHubertPretrainingTask(FairseqTask):
             image_std=self.cfg.image_std,
             image_crop_size=self.cfg.image_crop_size,
             image_aug=image_aug,
+            image_noise=image_noise,
             modalities=self.cfg.modalities,
             is_s2s=self.cfg.is_s2s,
             noise_fn=noise_fn,
