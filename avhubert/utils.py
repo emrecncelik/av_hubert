@@ -11,6 +11,7 @@ import numpy as np
 from typing import Dict, List, Optional, Tuple
 from scipy.ndimage import gaussian_filter
 
+
 def load_video(path):
     for i in range(3):
         try:
@@ -38,6 +39,7 @@ class GaussianBlur(object):
         sigma (float or sequence of float): Standard deviation for the Gaussian kernel.
             If a single float is provided, the same sigma is used for both spatial dims.
     """
+
     def __init__(self, sigma):
         self.sigma = sigma
 
@@ -48,13 +50,10 @@ class GaussianBlur(object):
         Returns:
             numpy.ndarray: Blurred frame, same shape and dtype.
         """
-        # Allocate output array
         out = np.empty_like(frame)
 
-        # Blur each channel independently
         for c in range(frame.shape[2]):
             blurred = gaussian_filter(frame[..., c], sigma=self.sigma)
-            # Clip back into valid range and cast to original dtype
             out[..., c] = np.clip(blurred, 0, 255).astype(frame.dtype)
 
         return out
@@ -78,17 +77,16 @@ class Compose(object):
         return sample
 
     def __repr__(self):
-        format_string = self.__class__.__name__ + '('
+        format_string = self.__class__.__name__ + "("
         for t in self.preprocess:
-            format_string += '\n'
-            format_string += '    {0}'.format(t)
-        format_string += '\n)'
+            format_string += "\n"
+            format_string += "    {0}".format(t)
+        format_string += "\n)"
         return format_string
 
 
 class Normalize(object):
-    """Normalize a ndarray image with mean and standard deviation.
-    """
+    """Normalize a ndarray image with mean and standard deviation."""
 
     def __init__(self, mean, std):
         self.mean = mean
@@ -105,11 +103,14 @@ class Normalize(object):
         return frames
 
     def __repr__(self):
-        return self.__class__.__name__+'(mean={0}, std={1})'.format(self.mean, self.std)
+        return self.__class__.__name__ + "(mean={0}, std={1})".format(
+            self.mean, self.std
+        )
+
 
 class CenterCrop(object):
-    """Crop the given image at the center
-    """
+    """Crop the given image at the center"""
+
     def __init__(self, size):
         self.size = size
 
@@ -122,15 +123,14 @@ class CenterCrop(object):
         """
         t, h, w = frames.shape
         th, tw = self.size
-        delta_w = int(round((w - tw))/2.)
-        delta_h = int(round((h - th))/2.)
-        frames = frames[:, delta_h:delta_h+th, delta_w:delta_w+tw]
+        delta_w = int(round((w - tw)) / 2.0)
+        delta_h = int(round((h - th)) / 2.0)
+        frames = frames[:, delta_h : delta_h + th, delta_w : delta_w + tw]
         return frames
 
 
 class RandomCrop(object):
-    """Crop the given image at the center
-    """
+    """Crop the given image at the center"""
 
     def __init__(self, size):
         self.size = size
@@ -144,17 +144,17 @@ class RandomCrop(object):
         """
         t, h, w = frames.shape
         th, tw = self.size
-        delta_w = random.randint(0, w-tw)
-        delta_h = random.randint(0, h-th)
-        frames = frames[:, delta_h:delta_h+th, delta_w:delta_w+tw]
+        delta_w = random.randint(0, w - tw)
+        delta_h = random.randint(0, h - th)
+        frames = frames[:, delta_h : delta_h + th, delta_w : delta_w + tw]
         return frames
 
     def __repr__(self):
-        return self.__class__.__name__ + '(size={0})'.format(self.size)
+        return self.__class__.__name__ + "(size={0})".format(self.size)
+
 
 class HorizontalFlip(object):
-    """Flip image horizontally.
-    """
+    """Flip image horizontally."""
 
     def __init__(self, flip_ratio):
         self.flip_ratio = flip_ratio
@@ -171,6 +171,7 @@ class HorizontalFlip(object):
             for index in range(t):
                 frames[index] = cv2.flip(frames[index], 1)
         return frames
+
 
 def compute_mask_indices(
     shape: Tuple[int, int],
@@ -298,9 +299,15 @@ def compute_mask_indices(
         vals, run_starts, run_lengths = find_runs(mask[i])
         start_indices, lengths = run_starts[vals == True], run_lengths[vals == True]
         starts.append(start_indices)
-        ends.append(start_indices+lengths)
-        batch_indexes.append(np.zeros([len(start_indices)])+i)
-    return mask, np.concatenate(starts).astype(np.int64), np.concatenate(ends).astype(np.int64), np.concatenate(batch_indexes).astype(np.int64)
+        ends.append(start_indices + lengths)
+        batch_indexes.append(np.zeros([len(start_indices)]) + i)
+    return (
+        mask,
+        np.concatenate(starts).astype(np.int64),
+        np.concatenate(ends).astype(np.int64),
+        np.concatenate(batch_indexes).astype(np.int64),
+    )
+
 
 def find_runs(x):
     """Find runs of consecutive items in an array."""
@@ -308,7 +315,7 @@ def find_runs(x):
     # ensure array
     x = np.asanyarray(x)
     if x.ndim != 1:
-        raise ValueError('only 1D array supported')
+        raise ValueError("only 1D array supported")
     n = x.shape[0]
 
     # handle empty array
