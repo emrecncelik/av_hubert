@@ -60,21 +60,22 @@ def load_audio_visual(
         for ind, line in enumerate(f):
             items = line.strip().split("\t")
             sz = int(items[-2])  #
-            if min_keep is not None and sz < min_keep:
-                n_short += 1
-            elif max_keep is not None and sz > max_keep:
-                n_long += 1
-            elif (not is_seq_label) and (
-                not is_audio_label_aligned(sz / frame_rate, dur_from_label_list[ind])
-            ):
-                n_unaligned += 1
-            else:
-                video_path = items[1]
-                audio_path = items[2]
-                audio_id = items[0]
-                names.append((video_path, audio_path + ":" + audio_id))
-                inds.append(ind)
-                sizes.append(sz)
+            # Skipping checks, labels are not required
+            # if min_keep is not None and sz < min_keep:
+            #     n_short += 1
+            # elif max_keep is not None and sz > max_keep:
+            #     n_long += 1
+            # elif (not is_seq_label) and (
+            #     not is_audio_label_aligned(sz / frame_rate, dur_from_label_list[ind])
+            # ):
+            #     n_unaligned += 1
+            # else:
+            video_path = items[1]
+            audio_path = items[2]
+            audio_id = items[0]
+            names.append((video_path, audio_path + ":" + audio_id))
+            inds.append(ind)
+            sizes.append(sz)
     tot = ind + 1
     logger.info(
         (
